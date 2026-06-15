@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeetCode Daily Tracker 2026</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-sec: #f7f7f5;
+    --bg-ter: #f0f0ec;
+    --text: #1a1a1a;
+    --text-sec: #6b6b6b;
+    --text-ter: #9b9b9b;
+    --border: rgba(0,0,0,0.1);
+    --border-med: rgba(0,0,0,0.18);
+    --green: #3B6D11;
+    --green-bg: #EAF3DE;
+    --green-mid: #639922;
+    --amber: #854F0B;
+    --amber-bg: #FAEEDA;
+    --amber-mid: #EF9F27;
+    --red: #A32D2D;
+    --red-bg: #FCEBEB;
+    --blue: #185FA5;
+    --blue-bg: #E6F1FB;
+    --blue-mid: #378ADD;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a;
+      --bg-sec: #242424;
+      --bg-ter: #2e2e2e;
+      --text: #f0f0ec;
+      --text-sec: #a0a0a0;
+      --text-ter: #6b6b6b;
+      --border: rgba(255,255,255,0.1);
+      --border-med: rgba(255,255,255,0.18);
+      --green-bg: #1a2e09;
+      --amber-bg: #2e1f06;
+      --red-bg: #2e0f0f;
+      --blue-bg: #0a1e35;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg-ter); color: var(--text); min-height: 100vh; }
+  .container { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  /* Header */
+  .header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 36px; height: 36px; background: #F97316; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .logo-icon svg { width: 20px; height: 20px; fill: white; }
+  .logo-text { font-size: 20px; font-weight: 600; color: var(--text); }
+  .logo-sub { font-size: 13px; color: var(--text-sec); }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; text-align: center; }
+  .stat-val { font-size: 22px; font-weight: 600; color: var(--text); }
+  .stat-lbl { font-size: 11px; color: var(--text-sec); margin-top: 2px; }
+
+  /* Progress bar */
+  .progress-wrap { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-sec); margin-bottom: 8px; }
+  .progress-bar { height: 6px; background: var(--bg-ter); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green-mid); border-radius: 3px; transition: width 0.3s; width: 0%; }
+
+  /* Activity dots */
+  .activity-wrap { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px; }
+  .activity-title { font-size: 12px; color: var(--text-sec); margin-bottom: 8px; }
+  .dots { display: flex; flex-wrap: wrap; gap: 3px; }
+  .dot { width: 13px; height: 13px; border-radius: 3px; background: var(--bg-ter); cursor: default; }
+  .dot.done { background: var(--green-mid); }
+  .dot.partial { background: var(--amber-mid); }
+  .dot.today-dot { background: var(--blue-mid); outline: 2px solid var(--blue); outline-offset: 1px; }
+
+  /* Controls */
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+  .controls input, .controls select {
+    font-size: 13px; padding: 7px 11px;
+    border-radius: var(--radius); border: 0.5px solid var(--border-med);
+    background: var(--bg); color: var(--text); outline: none;
+  }
+  .controls input:focus, .controls select:focus { border-color: var(--blue-mid); }
+  .controls input { width: 200px; }
+  .btn {
+    font-size: 13px; padding: 7px 14px;
+    border-radius: var(--radius); border: 0.5px solid var(--border-med);
+    background: var(--bg); color: var(--text); cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .btn:hover { background: var(--bg-sec); }
+  .btn-primary { background: var(--green-bg); color: var(--green); border-color: var(--green); }
+  .btn-primary:hover { background: var(--green-bg); opacity: 0.85; }
+
+  /* Phase divider */
+  .phase-div {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 600; color: var(--green);
+    padding: 10px 14px; background: var(--green-bg);
+    border-radius: var(--radius); margin: 20px 0 10px;
+    border-left: 3px solid var(--green);
+  }
+
+  /* Week header */
+  .week-hdr {
+    font-size: 12px; font-weight: 500; color: var(--text-sec);
+    padding: 8px 0 5px; border-bottom: 0.5px solid var(--border);
+    margin-bottom: 8px;
+  }
+
+  /* Day card */
+  .day-card {
+    background: var(--bg); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 8px;
+  }
+  .day-card.is-today { border: 2px solid var(--blue-mid); }
+  .day-card.all-done { background: var(--bg-sec); }
+
+  .day-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .day-date { font-size: 14px; font-weight: 500; color: var(--text); flex: 1; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .tag-today { background: var(--blue-bg); color: var(--blue); }
+  .tag-weekday { background: var(--green-bg); color: var(--green); }
+  .tag-weekend { background: var(--amber-bg); color: var(--amber); }
+  .day-count { font-size: 12px; color: var(--text-sec); }
+
+  /* Question row */
+  .q-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 0; border-top: 0.5px solid var(--border);
+  }
+  .q-cb { width: 15px; height: 15px; cursor: pointer; accent-color: var(--green); flex-shrink: 0; }
+  .q-link { font-size: 13px; color: var(--blue); text-decoration: none; flex: 1; }
+  .q-link:hover { text-decoration: underline; }
+  .q-link.done-link { text-decoration: line-through; opacity: 0.45; }
+  .diff { font-size: 11px; padding: 2px 8px; border-radius: 20px; flex-shrink: 0; font-weight: 500; }
+  .diff-easy { background: var(--green-bg); color: var(--green); }
+  .diff-medium { background: var(--amber-bg); color: var(--amber); }
+  .diff-hard { background: var(--red-bg); color: var(--red); }
+  .q-topic { font-size: 11px; color: var(--text-ter); flex-shrink: 0; display: none; }
+  @media(min-width:600px){ .q-topic { display: inline; } }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 40px; color: var(--text-sec); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <div>
+        <div class="logo-text">LeetCode Tracker</div>
+        <div class="logo-sub">Jun 15 – Dec 31, 2026 · Vivek's DSA Plan</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="scrollToToday()">📅 Today</button>
+      <button class="btn" onclick="confirmReset()">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="s-done">0</div><div class="stat-lbl">Solved</div></div>
+    <div class="stat"><div class="stat-val" id="s-total">—</div><div class="stat-lbl">Total</div></div>
+    <div class="stat"><div class="stat-val" id="s-streak">0 🔥</div><div class="stat-lbl">Day streak</div></div>
+    <div class="stat"><div class="stat-val" id="s-pct">0%</div><div class="stat-lbl">Progress</div></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label"><span>Overall progress</span><span id="prog-label">0 / 0</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+  </div>
+
+  <div class="activity-wrap">
+    <div class="activity-title">Activity — last 70 days (🟩 done · 🟧 partial · 🟦 today)</div>
+    <div class="dots" id="dots"></div>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="search" placeholder="🔍 Search question name..." oninput="render()">
+    <select id="f-phase" onchange="render()">
+      <option value="">All phases</option>
+      <option value="1">Phase 1 – Foundation</option>
+      <option value="2">Phase 2 – Core patterns</option>
+      <option value="3">Phase 3 – Advanced</option>
+      <option value="4">Phase 4 – Interview mode</option>
+    </select>
+    <select id="f-diff" onchange="render()">
+      <option value="">All difficulties</option>
+      <option value="Easy">Easy</option>
+      <option value="Medium">Medium</option>
+      <option value="Hard">Hard</option>
+    </select>
+    <select id="f-topic" onchange="render()">
+      <option value="">All topics</option>
+    </select>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<script>
+const QUESTIONS = [
+  // ── Phase 1: Foundation ──────────────────────────────────────────────
+  // Week 1 – Arrays & Strings
+  {id:1,   title:"Two Sum",                                     slug:"two-sum",                                              diff:"Easy",   topic:"Arrays"},
+  {id:217, title:"Contains Duplicate",                          slug:"contains-duplicate",                                   diff:"Easy",   topic:"Arrays"},
+  {id:238, title:"Product of Array Except Self",                slug:"product-of-array-except-self",                         diff:"Medium", topic:"Arrays"},
+  {id:36,  title:"Valid Sudoku",                                slug:"valid-sudoku",                                         diff:"Medium", topic:"Arrays"},
+  {id:128, title:"Longest Consecutive Sequence",                slug:"longest-consecutive-sequence",                         diff:"Medium", topic:"Arrays"},
+  // Week 1 weekend
+  {id:242, title:"Valid Anagram",                               slug:"valid-anagram",                                        diff:"Easy",   topic:"Strings"},
+  {id:49,  title:"Group Anagrams",                              slug:"group-anagrams",                                       diff:"Medium", topic:"Strings"},
+  {id:271, title:"Encode and Decode Strings",                   slug:"encode-and-decode-strings",                            diff:"Medium", topic:"Strings"},
+  {id:347, title:"Top K Frequent Elements",                     slug:"top-k-frequent-elements",                              diff:"Medium", topic:"Arrays"},
+  {id:238, title:"Product of Array Except Self",                slug:"product-of-array-except-self",                         diff:"Medium", topic:"Arrays"},
+  // Week 2 – Hashing & Maps (weekdays)
+  {id:1,   title:"Two Sum",                                     slug:"two-sum",                                              diff:"Easy",   topic:"Hashing"},
+  {id:49,  title:"Group Anagrams",                              slug:"group-anagrams",                                       diff:"Medium", topic:"Hashing"},
+  {id:347, title:"Top K Frequent Elements",                     slug:"top-k-frequent-elements",                              diff:"Medium", topic:"Hashing"},
+  {id:128, title:"Longest Consecutive Sequence",                slug:"longest-consecutive-sequence",                         diff:"Medium", topic:"Hashing"},
+  {id:560, title:"Subarray Sum Equals K",                       slug:"subarray-sum-equals-k",                                diff:"Medium", topic:"Hashing"},
+  // Week 2 weekend
+  {id:380, title:"Insert Delete GetRandom O(1)",                slug:"insert-delete-getrandom-o1",                           diff:"Medium", topic:"Hashing"},
+  {id:36,  title:"Valid Sudoku",                                slug:"valid-sudoku",                                         diff:"Medium", topic:"Hashing"},
+  {id:299, title:"Bulls and Cows",                              slug:"bulls-and-cows",                                       diff:"Medium", topic:"Hashing"},
+  {id:202, title:"Happy Number",                                slug:"happy-number",                                         diff:"Easy",   topic:"Hashing"},
+  {id:387, title:"First Unique Character in a String",          slug:"first-unique-character-in-a-string",                   diff:"Easy",   topic:"Hashing"},
+  // Week 3 – Linked Lists (weekdays)
+  {id:206, title:"Reverse Linked List",                         slug:"reverse-linked-list",                                  diff:"Easy",   topic:"Linked List"},
+  {id:21,  title:"Merge Two Sorted Lists",                      slug:"merge-two-sorted-lists",                               diff:"Easy",   topic:"Linked List"},
+  {id:143, title:"Reorder List",                                slug:"reorder-list",                                         diff:"Medium", topic:"Linked List"},
+  {id:19,  title:"Remove Nth Node From End of List",            slug:"remove-nth-node-from-end-of-list",                     diff:"Medium", topic:"Linked List"},
+  {id:138, title:"Copy List with Random Pointer",               slug:"copy-list-with-random-pointer",                        diff:"Medium", topic:"Linked List"},
+  // Week 3 weekend
+  {id:2,   title:"Add Two Numbers",                             slug:"add-two-numbers",                                      diff:"Medium", topic:"Linked List"},
+  {id:287, title:"Find the Duplicate Number",                   slug:"find-the-duplicate-number",                            diff:"Medium", topic:"Linked List"},
+  {id:146, title:"LRU Cache",                                   slug:"lru-cache",                                            diff:"Medium", topic:"Linked List"},
+  {id:23,  title:"Merge K Sorted Lists",                        slug:"merge-k-sorted-lists",                                 diff:"Hard",   topic:"Linked List"},
+  {id:25,  title:"Reverse Nodes in k-Group",                    slug:"reverse-nodes-in-k-group",                             diff:"Hard",   topic:"Linked List"},
+  // Week 4 – Stacks & Queues (weekdays)
+  {id:20,  title:"Valid Parentheses",                           slug:"valid-parentheses",                                    diff:"Easy",   topic:"Stack"},
+  {id:155, title:"Min Stack",                                   slug:"min-stack",                                            diff:"Medium", topic:"Stack"},
+  {id:150, title:"Evaluate Reverse Polish Notation",            slug:"evaluate-reverse-polish-notation",                     diff:"Medium", topic:"Stack"},
+  {id:22,  title:"Generate Parentheses",                        slug:"generate-parentheses",                                 diff:"Medium", topic:"Stack"},
+  {id:739, title:"Daily Temperatures",                          slug:"daily-temperatures",                                   diff:"Medium", topic:"Stack"},
+  // Week 4 weekend
+  {id:853, title:"Car Fleet",                                   slug:"car-fleet",                                            diff:"Medium", topic:"Stack"},
+  {id:84,  title:"Largest Rectangle in Histogram",              slug:"largest-rectangle-in-histogram",                       diff:"Hard",   topic:"Stack"},
+  {id:232, title:"Implement Queue using Stacks",                slug:"implement-queue-using-stacks",                         diff:"Easy",   topic:"Queue"},
+  {id:225, title:"Implement Stack using Queues",                slug:"implement-stack-using-queues",                         diff:"Easy",   topic:"Queue"},
+  {id:346, title:"Moving Average from Data Stream",             slug:"moving-average-from-data-stream",                      diff:"Easy",   topic:"Queue"},
+
+  // ── Phase 2: Core Patterns ────────────────────────────────────────────
+  // Week 5 – Binary Search (weekdays)
+  {id:704, title:"Binary Search",                               slug:"binary-search",                                        diff:"Easy",   topic:"Binary Search"},
+  {id:74,  title:"Search a 2D Matrix",                          slug:"search-a-2d-matrix",                                   diff:"Medium", topic:"Binary Search"},
+  {id:875, title:"Koko Eating Bananas",                         slug:"koko-eating-bananas",                                  diff:"Medium", topic:"Binary Search"},
+  {id:153, title:"Find Minimum in Rotated Sorted Array",        slug:"find-minimum-in-rotated-sorted-array",                 diff:"Medium", topic:"Binary Search"},
+  {id:33,  title:"Search in Rotated Sorted Array",              slug:"search-in-rotated-sorted-array",                       diff:"Medium", topic:"Binary Search"},
+  // Week 5 weekend
+  {id:981, title:"Time Based Key-Value Store",                  slug:"time-based-key-value-store",                           diff:"Medium", topic:"Binary Search"},
+  {id:4,   title:"Median of Two Sorted Arrays",                 slug:"median-of-two-sorted-arrays",                          diff:"Hard",   topic:"Binary Search"},
+  {id:35,  title:"Search Insert Position",                      slug:"search-insert-position",                               diff:"Easy",   topic:"Binary Search"},
+  {id:278, title:"First Bad Version",                           slug:"first-bad-version",                                    diff:"Easy",   topic:"Binary Search"},
+  {id:162, title:"Find Peak Element",                           slug:"find-peak-element",                                    diff:"Medium", topic:"Binary Search"},
+  // Week 6 – Two Pointers & Sliding Window (weekdays)
+  {id:125, title:"Valid Palindrome",                            slug:"valid-palindrome",                                     diff:"Easy",   topic:"Two Pointers"},
+  {id:167, title:"Two Sum II",                                  slug:"two-sum-ii-input-array-is-sorted",                     diff:"Medium", topic:"Two Pointers"},
+  {id:15,  title:"3Sum",                                        slug:"3sum",                                                 diff:"Medium", topic:"Two Pointers"},
+  {id:11,  title:"Container With Most Water",                   slug:"container-with-most-water",                            diff:"Medium", topic:"Two Pointers"},
+  {id:42,  title:"Trapping Rain Water",                         slug:"trapping-rain-water",                                  diff:"Hard",   topic:"Two Pointers"},
+  // Week 6 weekend
+  {id:121, title:"Best Time to Buy and Sell Stock",             slug:"best-time-to-buy-and-sell-stock",                      diff:"Easy",   topic:"Sliding Window"},
+  {id:3,   title:"Longest Substring Without Repeating Characters",slug:"longest-substring-without-repeating-characters",    diff:"Medium", topic:"Sliding Window"},
+  {id:424, title:"Longest Repeating Character Replacement",     slug:"longest-repeating-character-replacement",              diff:"Medium", topic:"Sliding Window"},
+  {id:567, title:"Permutation in String",                       slug:"permutation-in-string",                                diff:"Medium", topic:"Sliding Window"},
+  {id:76,  title:"Minimum Window Substring",                    slug:"minimum-window-substring",                             diff:"Hard",   topic:"Sliding Window"},
+  // Week 7 – Trees Basics (weekdays)
+  {id:226, title:"Invert Binary Tree",                          slug:"invert-binary-tree",                                   diff:"Easy",   topic:"Trees"},
+  {id:104, title:"Maximum Depth of Binary Tree",                slug:"maximum-depth-of-binary-tree",                         diff:"Easy",   topic:"Trees"},
+  {id:543, title:"Diameter of Binary Tree",                     slug:"diameter-of-binary-tree",                              diff:"Easy",   topic:"Trees"},
+  {id:110, title:"Balanced Binary Tree",                        slug:"balanced-binary-tree",                                 diff:"Easy",   topic:"Trees"},
+  {id:100, title:"Same Tree",                                   slug:"same-tree",                                            diff:"Easy",   topic:"Trees"},
+  // Week 7 weekend
+  {id:572, title:"Subtree of Another Tree",                     slug:"subtree-of-another-tree",                              diff:"Easy",   topic:"Trees"},
+  {id:235, title:"LCA of a Binary Search Tree",                 slug:"lowest-common-ancestor-of-a-binary-search-tree",       diff:"Medium", topic:"Trees"},
+  {id:102, title:"Binary Tree Level Order Traversal",           slug:"binary-tree-level-order-traversal",                    diff:"Medium", topic:"Trees"},
+  {id:199, title:"Binary Tree Right Side View",                 slug:"binary-tree-right-side-view",                          slug:"binary-tree-right-side-view",diff:"Medium",topic:"Trees"},
+  {id:1448,title:"Count Good Nodes in Binary Tree",             slug:"count-good-nodes-in-binary-tree",                      diff:"Medium", topic:"Trees"},
+  // Week 8 – Trees Advanced (weekdays)
+  {id:98,  title:"Validate Binary Search Tree",                 slug:"validate-binary-search-tree",                          diff:"Medium", topic:"Trees"},
+  {id:230, title:"Kth Smallest Element in BST",                 slug:"kth-smallest-element-in-a-bst",                        diff:"Medium", topic:"Trees"},
+  {id:105, title:"Construct Binary Tree from Preorder & Inorder",slug:"construct-binary-tree-from-preorder-and-inorder-traversal",diff:"Medium",topic:"Trees"},
+  {id:124, title:"Binary Tree Maximum Path Sum",                slug:"binary-tree-maximum-path-sum",                         diff:"Hard",   topic:"Trees"},
+  {id:297, title:"Serialize and Deserialize Binary Tree",       slug:"serialize-and-deserialize-binary-tree",                diff:"Hard",   topic:"Trees"},
+  // Week 8 weekend
+  {id:116, title:"Populating Next Right Pointers in Each Node", slug:"populating-next-right-pointers-in-each-node",          diff:"Medium", topic:"Trees"},
+  {id:114, title:"Flatten Binary Tree to Linked List",          slug:"flatten-binary-tree-to-linked-list",                   diff:"Medium", topic:"Trees"},
+  {id:437, title:"Path Sum III",                                slug:"path-sum-iii",                                         diff:"Medium", topic:"Trees"},
+  {id:236, title:"LCA of Binary Tree",                          slug:"lowest-common-ancestor-of-a-binary-tree",              diff:"Medium", topic:"Trees"},
+  {id:112, title:"Path Sum",                                    slug:"path-sum",                                             diff:"Easy",   topic:"Trees"},
+  // Week 9 – Heap / Priority Queue (weekdays)
+  {id:703, title:"Kth Largest Element in a Stream",             slug:"kth-largest-element-in-a-stream",                      diff:"Easy",   topic:"Heap"},
+  {id:1046,title:"Last Stone Weight",                           slug:"last-stone-weight",                                    diff:"Easy",   topic:"Heap"},
+  {id:973, title:"K Closest Points to Origin",                  slug:"k-closest-points-to-origin",                           diff:"Medium", topic:"Heap"},
+  {id:215, title:"Kth Largest Element in an Array",             slug:"kth-largest-element-in-an-array",                      diff:"Medium", topic:"Heap"},
+  {id:621, title:"Task Scheduler",                              slug:"task-scheduler",                                       diff:"Medium", topic:"Heap"},
+  // Week 9 weekend
+  {id:355, title:"Design Twitter",                              slug:"design-twitter",                                       diff:"Medium", topic:"Heap"},
+  {id:295, title:"Find Median from Data Stream",                slug:"find-median-from-data-stream",                         diff:"Hard",   topic:"Heap"},
+  {id:23,  title:"Merge K Sorted Lists",                        slug:"merge-k-sorted-lists",                                 diff:"Hard",   topic:"Heap"},
+  {id:347, title:"Top K Frequent Elements",                     slug:"top-k-frequent-elements",                              diff:"Medium", topic:"Heap"},
+  {id:378, title:"Kth Smallest Element in Sorted Matrix",       slug:"kth-smallest-element-in-a-sorted-matrix",              diff:"Medium", topic:"Heap"},
+  // Week 10 – Graphs Basics (weekdays)
+  {id:200, title:"Number of Islands",                           slug:"number-of-islands",                                    diff:"Medium", topic:"Graphs"},
+  {id:695, title:"Max Area of Island",                          slug:"max-area-of-island",                                   diff:"Medium", topic:"Graphs"},
+  {id:133, title:"Clone Graph",                                 slug:"clone-graph",                                          diff:"Medium", topic:"Graphs"},
+  {id:994, title:"Rotting Oranges",                             slug:"rotting-oranges",                                      diff:"Medium", topic:"Graphs"},
+  {id:417, title:"Pacific Atlantic Water Flow",                 slug:"pacific-atlantic-water-flow",                          diff:"Medium", topic:"Graphs"},
+  // Week 10 weekend
+  {id:130, title:"Surrounded Regions",                          slug:"surrounded-regions",                                   diff:"Medium", topic:"Graphs"},
+  {id:286, title:"Walls and Gates",                             slug:"walls-and-gates",                                      diff:"Medium", topic:"Graphs"},
+  {id:1091,title:"Shortest Path in Binary Matrix",              slug:"shortest-path-in-binary-matrix",                       diff:"Medium", topic:"Graphs"},
+  {id:542, title:"01 Matrix",                                   slug:"01-matrix",                                            diff:"Medium", topic:"Graphs"},
+  {id:505, title:"The Maze",                                    slug:"the-maze",                                             diff:"Medium", topic:"Graphs"},
+
+  // ── Phase 3: Advanced ─────────────────────────────────────────────────
+  // Week 11 – Graphs Advanced (weekdays)
+  {id:207, title:"Course Schedule",                             slug:"course-schedule",                                      diff:"Medium", topic:"Graphs"},
+  {id:210, title:"Course Schedule II",                          slug:"course-schedule-ii",                                   diff:"Medium", topic:"Graphs"},
+  {id:684, title:"Redundant Connection",                        slug:"redundant-connection",                                  diff:"Medium", topic:"Graphs"},
+  {id:743, title:"Network Delay Time",                          slug:"network-delay-time",                                   diff:"Medium", topic:"Graphs"},
+  {id:127, title:"Word Ladder",                                 slug:"word-ladder",                                          diff:"Hard",   topic:"Graphs"},
+  // Week 11 weekend
+  {id:332, title:"Reconstruct Itinerary",                       slug:"reconstruct-itinerary",                                diff:"Hard",   topic:"Graphs"},
+  {id:778, title:"Swim in Rising Water",                        slug:"swim-in-rising-water",                                 diff:"Hard",   topic:"Graphs"},
+  {id:323, title:"Number of Connected Components",              slug:"number-of-connected-components-in-an-undirected-graph",diff:"Medium", topic:"Graphs"},
+  {id:261, title:"Graph Valid Tree",                            slug:"graph-valid-tree",                                     diff:"Medium", topic:"Graphs"},
+  {id:787, title:"Cheapest Flights Within K Stops",             slug:"find-the-city-that-is-the-smallest-number-of-neighbors-at-a-threshold-distance",diff:"Medium",topic:"Graphs"},
+  // Week 12 – 1D Dynamic Programming (weekdays)
+  {id:70,  title:"Climbing Stairs",                             slug:"climbing-stairs",                                      diff:"Easy",   topic:"1D DP"},
+  {id:746, title:"Min Cost Climbing Stairs",                    slug:"min-cost-climbing-stairs",                             diff:"Easy",   topic:"1D DP"},
+  {id:198, title:"House Robber",                                slug:"house-robber",                                         diff:"Medium", topic:"1D DP"},
+  {id:213, title:"House Robber II",                             slug:"house-robber-ii",                                      diff:"Medium", topic:"1D DP"},
+  {id:5,   title:"Longest Palindromic Substring",               slug:"longest-palindromic-substring",                        diff:"Medium", topic:"1D DP"},
+  // Week 12 weekend
+  {id:647, title:"Palindromic Substrings",                      slug:"palindromic-substrings",                               diff:"Medium", topic:"1D DP"},
+  {id:91,  title:"Decode Ways",                                 slug:"decode-ways",                                          diff:"Medium", topic:"1D DP"},
+  {id:322, title:"Coin Change",                                 slug:"coin-change",                                          diff:"Medium", topic:"1D DP"},
+  {id:152, title:"Maximum Product Subarray",                    slug:"maximum-product-subarray",                             diff:"Medium", topic:"1D DP"},
+  {id:139, title:"Word Break",                                  slug:"word-break",                                           diff:"Medium", topic:"1D DP"},
+  // Week 13 – 2D Dynamic Programming (weekdays)
+  {id:300, title:"Longest Increasing Subsequence",              slug:"longest-increasing-subsequence",                       diff:"Medium", topic:"2D DP"},
+  {id:416, title:"Partition Equal Subset Sum",                  slug:"partition-equal-subset-sum",                           diff:"Medium", topic:"2D DP"},
+  {id:62,  title:"Unique Paths",                                slug:"unique-paths",                                         diff:"Medium", topic:"2D DP"},
+  {id:1143,title:"Longest Common Subsequence",                  slug:"longest-common-subsequence",                           diff:"Medium", topic:"2D DP"},
+  {id:309, title:"Best Time to Buy/Sell Stock with Cooldown",   slug:"best-time-to-buy-and-sell-stock-with-cooldown",        diff:"Medium", topic:"2D DP"},
+  // Week 13 weekend
+  {id:518, title:"Coin Change II",                              slug:"coin-change-ii",                                       diff:"Medium", topic:"2D DP"},
+  {id:494, title:"Target Sum",                                  slug:"target-sum",                                           diff:"Medium", topic:"2D DP"},
+  {id:97,  title:"Interleaving String",                         slug:"interleaving-string",                                  diff:"Medium", topic:"2D DP"},
+  {id:72,  title:"Edit Distance",                               slug:"edit-distance",                                        diff:"Medium", topic:"2D DP"},
+  {id:115, title:"Distinct Subsequences",                       slug:"distinct-subsequences",                                diff:"Hard",   topic:"2D DP"},
+  // Week 14 – Intervals (weekdays)
+  {id:57,  title:"Insert Interval",                             slug:"insert-interval",                                      diff:"Medium", topic:"Intervals"},
+  {id:56,  title:"Merge Intervals",                             slug:"merge-intervals",                                      diff:"Medium", topic:"Intervals"},
+  {id:435, title:"Non-overlapping Intervals",                   slug:"non-overlapping-intervals",                            diff:"Medium", topic:"Intervals"},
+  {id:252, title:"Meeting Rooms",                               slug:"meeting-rooms",                                        diff:"Easy",   topic:"Intervals"},
+  {id:253, title:"Meeting Rooms II",                            slug:"meeting-rooms-ii",                                     diff:"Medium", topic:"Intervals"},
+  // Week 14 weekend
+  {id:1851,title:"Minimum Interval to Include Each Query",      slug:"minimum-interval-to-include-each-query",               diff:"Hard",   topic:"Intervals"},
+  {id:452, title:"Minimum Number of Arrows to Burst Balloons",  slug:"minimum-number-of-arrows-to-burst-balloons",           diff:"Medium", topic:"Intervals"},
+  {id:986, title:"Interval List Intersections",                 slug:"interval-list-intersections",                          diff:"Medium", topic:"Intervals"},
+  {id:48,  title:"Rotate Image",                                slug:"rotate-image",                                         diff:"Medium", topic:"Math & Geometry"},
+  {id:54,  title:"Spiral Matrix",                               slug:"spiral-matrix",                                        diff:"Medium", topic:"Math & Geometry"},
+  // Week 15 – Trie & Backtracking (weekdays)
+  {id:208, title:"Implement Trie",                              slug:"implement-trie-prefix-tree",                           diff:"Medium", topic:"Trie"},
+  {id:211, title:"Design Add and Search Words Data Structure",  slug:"design-add-and-search-words-data-structure",           diff:"Medium", topic:"Trie"},
+  {id:212, title:"Word Search II",                              slug:"word-search-ii",                                       diff:"Hard",   topic:"Trie"},
+  {id:78,  title:"Subsets",                                     slug:"subsets",                                              diff:"Medium", topic:"Backtracking"},
+  {id:39,  title:"Combination Sum",                             slug:"combination-sum",                                      diff:"Medium", topic:"Backtracking"},
+  // Week 15 weekend
+  {id:40,  title:"Combination Sum II",                          slug:"combination-sum-ii",                                   diff:"Medium", topic:"Backtracking"},
+  {id:46,  title:"Permutations",                                slug:"permutations",                                         diff:"Medium", topic:"Backtracking"},
+  {id:90,  title:"Subsets II",                                  slug:"subsets-ii",                                           diff:"Medium", topic:"Backtracking"},
+  {id:79,  title:"Word Search",                                 slug:"word-search",                                          diff:"Medium", topic:"Backtracking"},
+  {id:131, title:"Palindrome Partitioning",                     slug:"palindrome-partitioning",                              diff:"Medium", topic:"Backtracking"},
+  // Week 16 – Bit Manipulation & Greedy (weekdays)
+  {id:191, title:"Number of 1 Bits",                            slug:"number-of-1-bits",                                     diff:"Easy",   topic:"Bit Manipulation"},
+  {id:338, title:"Counting Bits",                               slug:"counting-bits",                                        diff:"Easy",   topic:"Bit Manipulation"},
+  {id:190, title:"Reverse Bits",                                slug:"reverse-bits",                                         diff:"Easy",   topic:"Bit Manipulation"},
+  {id:268, title:"Missing Number",                              slug:"missing-number",                                       diff:"Easy",   topic:"Bit Manipulation"},
+  {id:371, title:"Sum of Two Integers",                         slug:"sum-of-two-integers",                                  diff:"Medium", topic:"Bit Manipulation"},
+  // Week 16 weekend
+  {id:55,  title:"Jump Game",                                   slug:"jump-game",                                            diff:"Medium", topic:"Greedy"},
+  {id:45,  title:"Jump Game II",                                slug:"jump-game-ii",                                         diff:"Medium", topic:"Greedy"},
+  {id:134, title:"Gas Station",                                 slug:"gas-station",                                          diff:"Medium", topic:"Greedy"},
+  {id:763, title:"Partition Labels",                            slug:"partition-labels",                                     diff:"Medium", topic:"Greedy"},
+  {id:678, title:"Valid Parenthesis String",                    slug:"valid-parenthesis-string",                             diff:"Medium", topic:"Greedy"},
+  // Week 17 – Revision 1 (weekdays)
+  {id:17,  title:"Letter Combinations of a Phone Number",       slug:"letter-combinations-of-a-phone-number",                diff:"Medium", topic:"Backtracking"},
+  {id:51,  title:"N-Queens",                                    slug:"n-queens",                                             diff:"Hard",   topic:"Backtracking"},
+  {id:312, title:"Burst Balloons",                              slug:"burst-balloons",                                       diff:"Hard",   topic:"2D DP"},
+  {id:10,  title:"Regular Expression Matching",                 slug:"regular-expression-matching",                          diff:"Hard",   topic:"2D DP"},
+  {id:329, title:"Longest Increasing Path in a Matrix",         slug:"longest-increasing-path-in-a-matrix",                  diff:"Hard",   topic:"2D DP"},
+  // Week 17 weekend
+  {id:846, title:"Hand of Straights",                           slug:"hand-of-straights",                                    diff:"Medium", topic:"Greedy"},
+  {id:1899,title:"Merge Triplets to Form Target Triplet",       slug:"merge-triplets-to-form-target-triplet",                diff:"Medium", topic:"Greedy"},
+  {id:73,  title:"Set Matrix Zeroes",                           slug:"set-matrix-zeroes",                                    diff:"Medium", topic:"Math & Geometry"},
+  {id:50,  title:"Pow(x, n)",                                   slug:"powx-n",                                               diff:"Medium", topic:"Math & Geometry"},
+  {id:43,  title:"Multiply Strings",                            slug:"multiply-strings",                                     diff:"Medium", topic:"Math & Geometry"},
+  // Week 18 – Revision 2 (weekdays)
+  {id:239, title:"Sliding Window Maximum",                      slug:"sliding-window-maximum",                               diff:"Hard",   topic:"Sliding Window"},
+  {id:7,   title:"Reverse Integer",                             slug:"reverse-integer",                                      diff:"Medium", topic:"Math & Geometry"},
+  {id:2013,title:"Detect Squares",                              slug:"detect-squares",                                       diff:"Medium", topic:"Math & Geometry"},
+  {id:269, title:"Alien Dictionary",                            slug:"alien-dictionary",                                     diff:"Hard",   topic:"Graphs"},
+  {id:460, title:"LFU Cache",                                   slug:"lfu-cache",                                            diff:"Hard",   topic:"Linked List"},
+  // Week 18 weekend
+  {id:41,  title:"First Missing Positive",                      slug:"first-missing-positive",                               diff:"Hard",   topic:"Arrays"},
+  {id:295, title:"Find Median from Data Stream",                slug:"find-median-from-data-stream",                         diff:"Hard",   topic:"Heap"},
+  {id:4,   title:"Median of Two Sorted Arrays",                 slug:"median-of-two-sorted-arrays",                          diff:"Hard",   topic:"Binary Search"},
+  {id:32,  title:"Longest Valid Parentheses",                   slug:"longest-valid-parentheses",                            diff:"Hard",   topic:"Stack"},
+  {id:124, title:"Binary Tree Maximum Path Sum",                slug:"binary-tree-maximum-path-sum",                         diff:"Hard",   topic:"Trees"},
+
+  // ── Phase 4: Interview Mode ───────────────────────────────────────────
+  {id:1,   title:"Two Sum",                             slug:"two-sum",                             diff:"Easy",   topic:"Mock"},
+  {id:206, title:"Reverse Linked List",                 slug:"reverse-linked-list",                 diff:"Easy",   topic:"Mock"},
+  {id:21,  title:"Merge Two Sorted Lists",              slug:"merge-two-sorted-lists",              diff:"Easy",   topic:"Mock"},
+  {id:121, title:"Best Time to Buy and Sell Stock",     slug:"best-time-to-buy-and-sell-stock",     diff:"Easy",   topic:"Mock"},
+  {id:226, title:"Invert Binary Tree",                  slug:"invert-binary-tree",                  diff:"Easy",   topic:"Mock"},
+  {id:704, title:"Binary Search",                       slug:"binary-search",                       diff:"Easy",   topic:"Mock"},
+  {id:200, title:"Number of Islands",                   slug:"number-of-islands",                   diff:"Medium", topic:"Mock"},
+  {id:15,  title:"3Sum",                                slug:"3sum",                                diff:"Medium", topic:"Mock"},
+  {id:3,   title:"Longest Substring Without Repeating Characters",slug:"longest-substring-without-repeating-characters",diff:"Medium",topic:"Mock"},
+  {id:198, title:"House Robber",                        slug:"house-robber",                        diff:"Medium", topic:"Mock"},
+  {id:322, title:"Coin Change",                         slug:"coin-change",                         diff:"Medium", topic:"Mock"},
+  {id:102, title:"Binary Tree Level Order Traversal",   slug:"binary-tree-level-order-traversal",   diff:"Medium", topic:"Mock"},
+  {id:207, title:"Course Schedule",                     slug:"course-schedule",                     diff:"Medium", topic:"Mock"},
+  {id:76,  title:"Minimum Window Substring",            slug:"minimum-window-substring",            diff:"Hard",   topic:"Mock"},
+  {id:297, title:"Serialize and Deserialize Binary Tree",slug:"serialize-and-deserialize-binary-tree",diff:"Hard",topic:"Mock"},
+  {id:23,  title:"Merge K Sorted Lists",                slug:"merge-k-sorted-lists",               diff:"Hard",   topic:"Mock"},
+  {id:42,  title:"Trapping Rain Water",                 slug:"trapping-rain-water",                diff:"Hard",   topic:"Mock"},
+  {id:124, title:"Binary Tree Maximum Path Sum",        slug:"binary-tree-maximum-path-sum",       diff:"Hard",   topic:"Mock"},
+  {id:84,  title:"Largest Rectangle in Histogram",      slug:"largest-rectangle-in-histogram",     diff:"Hard",   topic:"Mock"},
+  {id:295, title:"Find Median from Data Stream",        slug:"find-median-from-data-stream",       diff:"Hard",   topic:"Mock"},
+];
+
+const PHASE_INFO = [
+  {phase:1, label:"Phase 1 – Foundation",       weeks:[1,4],  icon:"📦"},
+  {phase:2, label:"Phase 2 – Core Patterns",    weeks:[5,10], icon:"🧩"},
+  {phase:3, label:"Phase 3 – Advanced",         weeks:[11,18],icon:"⚡"},
+  {phase:4, label:"Phase 4 – Interview Mode",   weeks:[19,99],icon:"🎯"},
+];
+
+function getPhase(w){ return w<=4?1:w<=10?2:w<=18?3:4; }
+function isWE(d){ return d.getDay()===0||d.getDay()===6; }
+function sameDay(a,b){ return a.toDateString()===b.toDateString(); }
+function dayKey(d){ return d.toISOString().slice(0,10); }
+
+// Build schedule
+const START = new Date(2026,5,15);
+const END   = new Date(2026,11,31);
+
+function buildSchedule(){
+  const sched=[]; let qi=0; let dn=0;
+  let d=new Date(START);
+  while(d<=END){
+    const cnt=isWE(d)?5:2;
+    const qs=[];
+    for(let i=0;i<cnt;i++){ qs.push(QUESTIONS[qi%QUESTIONS.length]); qi++; }
+    sched.push({date:new Date(d), qs, weekend:isWE(d), weekNum:Math.floor(dn/7)+1, phase:getPhase(Math.floor(dn/7)+1)});
+    d.setDate(d.getDate()+1); dn++;
+  }
+  return sched;
+}
+
+const SCHED = buildSchedule();
+const TOTAL = SCHED.reduce((a,d)=>a+d.qs.length,0);
+document.getElementById('s-total').textContent=TOTAL;
+
+// Populate topic filter
+const topics=[...new Set(QUESTIONS.map(q=>q.topic))].sort();
+const tf=document.getElementById('f-topic');
+topics.forEach(t=>{ const o=document.createElement('option'); o.value=t; o.textContent=t; tf.appendChild(o); });
+
+// State
+let done = JSON.parse(localStorage.getItem('lc2026_done')||'{}');
+function save(){ try{ localStorage.setItem('lc2026_done',JSON.stringify(done)); }catch(e){} }
+
+function qKey(d,i){ return dayKey(d.date)+'_'+i; }
+function countDone(){ return Object.values(done).filter(Boolean).length; }
+
+function computeStreak(){
+  const today=new Date(); let streak=0;
+  let d=new Date(today);
+  while(true){
+    const day=SCHED.find(s=>sameDay(s.date,d));
+    if(!day) break;
+    const all=day.qs.every((_,i)=>done[qKey(day,i)]);
+    if(all) streak++; else break;
+    d.setDate(d.getDate()-1);
+    if(d<START) break;
+  }
+  return streak;
+}
+
+function updateStats(){
+  const n=countDone();
+  document.getElementById('s-done').textContent=n;
+  document.getElementById('s-streak').textContent=computeStreak()+' 🔥';
+  document.getElementById('s-pct').textContent=Math.round(n/TOTAL*100)+'%';
+  document.getElementById('prog-label').textContent=n+' / '+TOTAL;
+  document.getElementById('prog-fill').style.width=Math.round(n/TOTAL*100)+'%';
+  renderDots();
+}
+
+function renderDots(){
+  const today=new Date();
+  const shown=SCHED.filter(d=>d.date<=today).slice(-70);
+  document.getElementById('dots').innerHTML=shown.map(d=>{
+    const total=d.qs.length;
+    const dc=d.qs.filter((_,i)=>done[qKey(d,i)]).length;
+    let cls='dot';
+    if(sameDay(d.date,today)) cls+=' today-dot';
+    else if(dc===total&&total>0) cls+=' done';
+    else if(dc>0) cls+=' partial';
+    return `<div class="${cls}" title="${d.date.toDateString()} · ${dc}/${total} done"></div>`;
+  }).join('');
+}
+
+function toggle(key, val){
+  done[key]=val; save(); updateStats();
+  // update just the checkbox label without full re-render
+  const label=document.querySelector(`[data-key="${key}"]`);
+  if(label){ const link=label.parentElement.querySelector('.q-link'); if(link){ link.classList.toggle('done-link',val); } }
+  updateStats();
+}
+
+function fmt(d){ return d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'}); }
+
+function render(){
+  const today=new Date();
+  const search=document.getElementById('search').value.toLowerCase();
+  const fp=document.getElementById('f-phase').value;
+  const fd=document.getElementById('f-diff').value;
+  const ft=document.getElementById('f-topic').value;
+
+  let lastPhase=null, lastWeek=null;
+  let html='', count=0;
+
+  SCHED.forEach(d=>{
+    if(fp && d.phase!=fp) return;
+    const matchQs=d.qs.filter((q,i)=>{
+      if(fd && q.diff!==fd) return false;
+      if(ft && q.topic!==ft) return false;
+      if(search && !q.title.toLowerCase().includes(search) && !String(q.id).includes(search)) return false;
+      return true;
+    });
+    if(!matchQs.length) return;
+    count++;
+
+    if(d.phase!==lastPhase){
+      const pi=PHASE_INFO.find(p=>p.phase===d.phase);
+      html+=`<div class="phase-div">${pi.icon} ${pi.label}</div>`;
+      lastPhase=d.phase; lastWeek=null;
+    }
+    if(d.weekNum!==lastWeek){
+      html+=`<div class="week-hdr">Week ${d.weekNum}</div>`;
+      lastWeek=d.weekNum;
+    }
+
+    const isToday=sameDay(d.date,today);
+    const dc=d.qs.filter((_,i)=>done[qKey(d,i)]).length;
+    const allDone=dc===d.qs.length;
+
+    let qhtml='';
+    d.qs.forEach((q,i)=>{
+      if(fd && q.diff!==fd) return;
+      if(ft && q.topic!==ft) return;
+      if(search && !q.title.toLowerCase().includes(search) && !String(q.id).includes(search)) return;
+      const k=qKey(d,i);
+      const chk=done[k]?'checked':'';
+      const dl=done[k]?' done-link':'';
+      qhtml+=`<div class="q-row">
+        <input type="checkbox" class="q-cb" data-key="${k}" ${chk} onchange="toggle('${k}',this.checked)">
+        <a href="https://leetcode.com/problems/${q.slug}/" target="_blank" rel="noopener" class="q-link${dl}">#${q.id} · ${q.title}</a>
+        <span class="diff diff-${q.diff.toLowerCase()}">${q.diff}</span>
+        <span class="q-topic">${q.topic}</span>
+      </div>`;
+    });
+
+    html+=`<div class="day-card${isToday?' is-today':''}${allDone?' all-done':''}" id="day-${dayKey(d.date)}">
+      <div class="day-top">
+        <span class="day-date">${fmt(d.date)}</span>
+        ${isToday?'<span class="tag tag-today">Today</span>':''}
+        <span class="tag ${d.weekend?'tag-weekend':'tag-weekday'}">${d.weekend?'Weekend · 5 questions':'Weekday · 2 questions'}</span>
+        <span style="font-size:12px;color:var(--text-sec);margin-left:auto">${dc}/${d.qs.length} done</span>
+      </div>
+      ${qhtml}
+    </div>`;
+  });
+
+  if(!count) html='<div class="empty">No questions match your filters.</div>';
+  document.getElementById('list').innerHTML=html;
+  updateStats();
+}
+
+function scrollToToday(){
+  const today=new Date();
+  const key=dayKey(today);
+  const el=document.getElementById('day-'+key);
+  if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
+  else alert('Today is not in the schedule range (Jun 15 – Dec 31 2026).');
+}
+
+function confirmReset(){
+  if(confirm('This will clear ALL your progress. Are you sure?')){ done={}; save(); render(); }
+}
+
+render();
+setTimeout(scrollToToday, 400);
+</script>
+</body>
+</html>
